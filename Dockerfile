@@ -1,6 +1,6 @@
 FROM python:3.10-alpine
 
-WORKDIR /app
+WORKDIR / owl_vectores
 
 COPY pyproject.toml poetry.lock ./
 
@@ -9,8 +9,9 @@ RUN pip install poetry && \
     pip install -r requirements.txt && \
     rm requirements.txt
 
-COPY app owl_vectores
+COPY owl_vectores owl_vectores
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "owl_vectores.app:app", "--host", "0.0.0.0", "--port", "8000"]
+
