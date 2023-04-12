@@ -1,6 +1,6 @@
 # Owl Vectores DB Service
 
-Owl Vectores DB Service is a microservice providing a simple key-value store using FastAPI, Poetry, Redis, and Docker Compose. It allows users to create, read, update, and delete values in the Vector DB.
+Owl Vectores DB Service provides a simple key-value store using FastAPI, Poetry, Redis, and Docker Compose. It allows users to create, read, update, and delete values in the Vector DB.
 
 ## Prerequisites
 
