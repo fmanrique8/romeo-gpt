@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+.venv/
+
+# Docker
+.dockerignore
+
+# Environment files
+.env
+
+# Test results
+coverage/
+htmlcov/
+junit.xml
+
+# Log files
+*.log
+
+# Development tools
+*.sublime-project
+*.sublime-workspace
+*.vscode/
+*.idea/
+*.swp
+*.swo
+*.swn
