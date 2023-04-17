@@ -1,79 +1,95 @@
-from fastapi import FastAPI, File, UploadFile
-from pydantic import BaseModel
-from typing import Dict
-import redis
+# owl-vectores/owl_vectores/app.py
 import os
-import shutil
-from owl_vectores.utils import intermediate_processor, grulla_processor
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from typing import List
+from dotenv import load_dotenv
+from owl_vectores.database import init, load_documents, search_redis, list_docs
+from owl_vectores.utils import intermediate_processor, primary_processor
+from owl_vectores.models import get_embedding, get_completion
+import logging
 
+load_dotenv(".env")
 app = FastAPI()
 
+API_KEY = os.environ["OPENAI_API_KEY"]
 
-class VectorData(BaseModel):
-    key: str
-    value: str
+logging.basicConfig(filename="ask_question.log", level=logging.INFO)
 
+# Set up CORS for allowing file uploads from different origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class PreprocessData(BaseModel):
-    files: Dict[str, bytes]
-
-
-redis_client = redis.Redis(host="vector-db", port=6379, decode_responses=True)
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "Owl Vectores DB Service"}
+redis_conn = init()
 
 
-@app.post("/vector/")
-def create_vector_data(vector_data: VectorData):
-    redis_client.set(vector_data.key, vector_data.value)
-    return {"result": "Vector data created"}
-
-
-@app.get("/vector/{key}")
-def read_vector_data(key: str):
-    value = redis_client.get(key)
-    if value:
-        return {"key": key, "value": value}
+def print_redis_schema(redis_conn, num_docs=5):
+    docs = list_docs(redis_conn, k=num_docs)
+    if len(docs) > 0:
+        print(f"Redis DB Schema: \n{docs[0].keys()}")
     else:
-        return {"error": "Key not found"}
+        print("No documents found in Redis")
 
 
-@app.put("/vector/{key}")
-def update_vector_data(key: str, vector_data: VectorData):
-    if redis_client.get(key):
-        redis_client.set(key, vector_data.value)
-        return {"result": "Vector data updated"}
-    else:
-        return {"error": "Key not found"}
+@app.post("/upload-files/")
+async def upload_files(files: List[UploadFile] = File(...)):
+    file_contents = []
+
+    for file in files:
+        content = await file.read()
+        file_contents.append((content, file.filename.split(".")[-1]))
+
+    # Process and store the uploaded files in Redis
+    df = intermediate_processor(file_contents)
+    print(f"Intermediate Processor DataFrame: \n{df.head()}\n{df.dtypes}")
+    df = primary_processor(df, API_KEY)
+    print(f"Primary Processor DataFrame: \n{df.head()}\n{df.dtypes}")
+    load_documents(redis_conn, df)
+
+    # Print Redis schema
+    print_redis_schema(redis_conn)
+
+    return {"status": "success", "message": "Files uploaded and stored in Redis"}
 
 
-@app.delete("/vector/{key}")
-def delete_vector_data(key: str):
-    if redis_client.get(key):
-        redis_client.delete(key)
-        return {"result": "Vector data deleted"}
-    else:
-        return {"error": "Key not found"}
+@app.post("/ask-question/")
+async def ask_question(question: str):
+    if not question:
+        raise HTTPException(status_code=400, detail="Please provide a question")
 
+    # Get embeddings for the question
+    query_vector = get_embedding(question, API_KEY)
 
-@app.post("/preprocess/")
-async def preprocess_pdf_files(preprocess_data: PreprocessData):
-    temp_dir = "temp_pdf_files"
-    os.makedirs(temp_dir, exist_ok=True)
+    # Reset the index by fetching all documents
+    all_documents = list_docs(redis_conn)
 
-    for file_name, file_content in preprocess_data.files.items():
-        with open(os.path.join(temp_dir, file_name), "wb") as f:
-            f.write(file_content)
+    # Perform semantic search
+    search_results = search_redis(
+        redis_conn, query_vector, return_fields=["document_name", "text_chunks"], k=1
+    )
 
-    df = intermediate_processor(temp_dir)
-    api_key = "your_openai_api_key"
-    result_df = grulla_processor(df, api_key)
+    # If no document is found, use all documents
+    if len(search_results) == 0:
+        search_results = all_documents
 
-    shutil.rmtree(temp_dir)
-    return result_df.to_dict(orient="records")
+    # Get the most relevant document
+    relevant_doc = search_results[0]
+
+    # Retrieve the text chunks from the document
+    text_chunks = relevant_doc["text_chunks"]
+
+    # Create a prompt using the text_chunks and the question
+    prompt = f"As an AI assistant, I have analyzed the following text chunks from the most relevant document to answer your question:\n\n{text_chunks}\n\nYour question: {question}\n\nAnswer:"
+
+    # Use get_completion to answer the original question
+    answer = get_completion(prompt=prompt, api_key=API_KEY)
+
+    return {"question": question, "answer": answer}
 
 
 if __name__ == "__main__":
