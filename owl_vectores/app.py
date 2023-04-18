@@ -65,7 +65,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
     print(f"Intermediate Processor DataFrame: \n{df.head()}\n{df.dtypes}")
     df = primary_processor(df, API_KEY)
     print(f"Primary Processor DataFrame: \n{df.head()}\n{df.dtypes}")
-
+    # Create index
     create_index(redis_conn, INDEX_NAME)  # Pass index_name here
     # Load documents
     load_documents(redis_conn, df)

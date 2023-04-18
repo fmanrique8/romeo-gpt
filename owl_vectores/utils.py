@@ -37,7 +37,7 @@ def extract_text_from_docx(file_content):
 
 def extract_text_from_txt(file_content):
     try:
-        encoding = detect_encoding(file_content)
+        detect_encoding(file_content)
         with io.BytesIO(file_content) as f:
             text = f.read()
         return text

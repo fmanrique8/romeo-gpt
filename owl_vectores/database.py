@@ -16,6 +16,24 @@ VECTOR_DIM = 1536
 DISTANCE_METRIC = "COSINE"
 
 
+def delete_existing_records(redis_conn: redis.Redis, INDEX_NAME: str):
+    base_query = f"*"
+    return_fields = ["document_name", "text_chunks"]
+    query = (
+        Query(base_query)
+        .paging(0, NUM_VECTORS)
+        .return_fields(*return_fields)
+        .dialect(2)
+    )
+    results = redis_conn.ft(INDEX_NAME).search(query)
+    docs = [process_doc(doc) for doc in results.docs]
+
+    for doc in docs:
+        key = f"{PREFIX}:{doc['document_name']}"  # Change vector_id to document_name
+        redis_conn.delete(key)
+    logging.warning(f"Deleted existing records for index {INDEX_NAME}.")
+
+
 def create_index(redis_conn: redis.Redis, INDEX_NAME: str):
     document_name = TextField(name="document_name")
     text_chunks = TextField(name="text_chunks")
@@ -39,6 +57,9 @@ def create_index(redis_conn: redis.Redis, INDEX_NAME: str):
     except redis.exceptions.ResponseError as e:
         if "Index already exists" in str(e):
             logging.warning(f"Index {INDEX_NAME} already exists.")
+            delete_existing_records(
+                redis_conn, INDEX_NAME
+            )  # Call the new function here
         else:
             raise e
 
