@@ -57,7 +57,7 @@ def process_doc(doc) -> dict:
     return d
 
 
-def index_documents(redis_conn: redis.Redis, df: pd.DataFrame, INDEX_NAME: str):
+def index_documents(redis_conn: redis.Redis, df: pd.DataFrame):
     pipe = redis_conn.pipeline()
     for index, row in df.iterrows():
         key = f"{PREFIX}:{row['vector_id']}"
@@ -70,30 +70,30 @@ def index_documents(redis_conn: redis.Redis, df: pd.DataFrame, INDEX_NAME: str):
         print(
             f"Indexing document: {key}, document_data: {document_data}"
         )  # Add print statement here
-        if index % 150 == 0:
-            pipe.execute()
     pipe.execute()
 
 
 def load_documents(
     redis_conn: redis.Redis,
     df: pd.DataFrame,
-    INDEX_NAME: str,
 ):
     print(f"Indexing {len(df)} Documents")
-    index_documents(redis_conn, df, INDEX_NAME)
+    index_documents(redis_conn, df)
     print("Redis Vector Index Created!")
 
 
 def list_docs(
     redis_conn: redis.Redis, INDEX_NAME: str, k: int = NUM_VECTORS
-) -> pd.DataFrame:
+) -> list[dict]:
     """
     List documents stored in Redis
     Args:
         k (int, optional): Number of results to fetch. Defaults to VECT_NUMBER.
     Returns:
         pd.DataFrame: Dataframe of results.
+        :param k:
+        :param INDEX_NAME:
+        :param redis_conn:
     """
     base_query = f"*"
     return_fields = ["document_name", "text_chunks"]
@@ -106,9 +106,11 @@ def search_redis(
     redis_conn: redis.Redis,
     INDEX_NAME: str,
     query_vector: t.List[float],
-    return_fields: list = [],
+    return_fields=None,
     k: int = 5,
 ) -> t.List[dict]:
+    if return_fields is None:
+        return_fields = []
     base_query = f"*=>[KNN {k} @embedding $vector AS vector_score]"
     query = (
         Query(base_query)

@@ -68,7 +68,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
     create_index(redis_conn, INDEX_NAME)  # Pass index_name here
     # Load documents
-    load_documents(redis_conn, df, INDEX_NAME)
+    load_documents(redis_conn, df)
 
     return {"status": "success", "message": "Files uploaded and stored in Redis"}
 
