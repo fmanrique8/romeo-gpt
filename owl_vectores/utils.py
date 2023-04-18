@@ -1,7 +1,6 @@
 # owl-vectores/owl_vectores/utils.py
 import io
 import openai
-import numpy as np
 import pandas as pd
 import warnings
 from PyPDF2 import PdfReader
@@ -36,13 +35,6 @@ def extract_text_from_docx(file_content):
         return b""
 
 
-def detect_encoding(file_content):
-    detector = UniversalDetector()
-    detector.feed(file_content)
-    detector.close()
-    return detector.result["encoding"]
-
-
 def extract_text_from_txt(file_content):
     try:
         encoding = detect_encoding(file_content)
@@ -52,6 +44,13 @@ def extract_text_from_txt(file_content):
     except Exception as e:
         warnings.warn(f"Failed to read the TXT file. Error: {str(e)}")
         return b""
+
+
+def detect_encoding(file_content):
+    detector = UniversalDetector()
+    detector.feed(file_content)
+    detector.close()
+    return detector.result["encoding"]
 
 
 def extract_text_from_files(df, file_contents):

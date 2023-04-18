@@ -1,13 +1,26 @@
 # owl-vectores/owl_vectores/app.py
 import os
+from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+from uuid import uuid4
 from dotenv import load_dotenv
-from owl_vectores.database import init, load_documents, search_redis, list_docs
+from owl_vectores.database import (
+    init,
+    load_documents,
+    search_redis,
+    list_docs,
+    create_index,
+)
 from owl_vectores.utils import intermediate_processor, primary_processor
 from owl_vectores.models import get_embedding, get_completion
 import logging
+from datetime import datetime
+
+timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+session_id = str(uuid4())
+INDEX_NAME = f"embedding-index-{session_id}-{timestamp}"
 
 load_dotenv(".env")
 app = FastAPI()
@@ -16,10 +29,15 @@ API_KEY = os.environ["OPENAI_API_KEY"]
 
 logging.basicConfig(filename="ask_question.log", level=logging.INFO)
 
-# Set up CORS for allowing file uploads from different origins
+# Replace `your-nextjs-app-url` with the actual URL of your deployed Next.js app
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # For local development
+    "https://your-nextjs-app-url.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,12 +46,10 @@ app.add_middleware(
 redis_conn = init()
 
 
-def print_redis_schema(redis_conn, num_docs=5):
-    docs = list_docs(redis_conn, k=num_docs)
-    if len(docs) > 0:
-        print(f"Redis DB Schema: \n{docs[0].keys()}")
-    else:
-        print("No documents found in Redis")
+# New root endpoint
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the Owl Vectores API!"}
 
 
 @app.post("/upload-files/")
@@ -49,28 +65,36 @@ async def upload_files(files: List[UploadFile] = File(...)):
     print(f"Intermediate Processor DataFrame: \n{df.head()}\n{df.dtypes}")
     df = primary_processor(df, API_KEY)
     print(f"Primary Processor DataFrame: \n{df.head()}\n{df.dtypes}")
-    load_documents(redis_conn, df)
 
-    # Print Redis schema
-    print_redis_schema(redis_conn)
+    create_index(redis_conn, INDEX_NAME)  # Pass index_name here
+    # Load documents
+    load_documents(redis_conn, df, INDEX_NAME)
 
     return {"status": "success", "message": "Files uploaded and stored in Redis"}
 
 
+class Question(BaseModel):
+    question: str
+
+
 @app.post("/ask-question/")
-async def ask_question(question: str):
+async def ask_question(q: Question):  # Add session_id as a parameter
+    question = q.question
     if not question:
         raise HTTPException(status_code=400, detail="Please provide a question")
 
     # Get embeddings for the question
     query_vector = get_embedding(question, API_KEY)
 
-    # Reset the index by fetching all documents
-    all_documents = list_docs(redis_conn)
+    all_documents = list_docs(redis_conn, INDEX_NAME)
 
     # Perform semantic search
     search_results = search_redis(
-        redis_conn, query_vector, return_fields=["document_name", "text_chunks"], k=1
+        redis_conn,
+        INDEX_NAME,  # Pass INDEX_NAME here
+        query_vector,
+        return_fields=["document_name", "text_chunks"],
+        k=1,
     )
 
     # If no document is found, use all documents
@@ -89,7 +113,7 @@ async def ask_question(question: str):
     # Use get_completion to answer the original question
     answer = get_completion(prompt=prompt, api_key=API_KEY)
 
-    return {"question": question, "answer": answer}
+    return {"question": question, "answer": answer, "session_id": session_id}
 
 
 if __name__ == "__main__":

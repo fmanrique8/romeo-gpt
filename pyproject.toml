@@ -24,6 +24,7 @@ python-dotenv = "^0.19.2"
 chardet = "^5.1.0"
 redis = "^4.5.4"
 scipy = "^1.10.1"
+itsdangerous = "^2.1.2"
 
 [build-system]
 requires = ["poetry-core"]

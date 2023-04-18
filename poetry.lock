@@ -515,6 +515,24 @@ files = [
 ]
 
 [[package]]
+name = "geoip2"
+version = "4.6.0"
+description = "MaxMind GeoIP2 API"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "geoip2-4.6.0-py2.py3-none-any.whl", hash = "sha256:745e2d7a665072690056f9566774727da89216c7858793f89804f6945f969714"},
+    {file = "geoip2-4.6.0.tar.gz", hash = "sha256:f0e80bce80b06bb38bd08bf4877d5a84e354e932095e6ccfb4d27bb598fa4f83"},
+]
+
+[package.dependencies]
+aiohttp = ">=3.6.2,<4.0.0"
+maxminddb = ">=2.2.0,<3.0.0"
+requests = ">=2.24.0,<3.0.0"
+urllib3 = ">=1.25.2,<2.0.0"
+
+[[package]]
 name = "gptcache"
 version = "0.1.11"
 description = "GPTCache, a powerful caching library that can be used to speed up and lower the cost of chat applications that rely on the LLM service. GPTCache works as a memcache for AIGC applications, similar to how Redis works for traditional applications."
@@ -639,6 +657,18 @@ python-versions = ">=3.7"
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
+]
+
+[[package]]
+name = "itsdangerous"
+version = "2.1.2"
+description = "Safely pass data to untrusted environments and back."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "itsdangerous-2.1.2-py3-none-any.whl", hash = "sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44"},
+    {file = "itsdangerous-2.1.2.tar.gz", hash = "sha256:5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a"},
 ]
 
 [[package]]
@@ -801,6 +831,17 @@ files = [
 
 [package.dependencies]
 marshmallow = ">=2.0.0"
+
+[[package]]
+name = "maxminddb"
+version = "2.2.0"
+description = "Reader for the MaxMind DB format"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "maxminddb-2.2.0.tar.gz", hash = "sha256:e37707ec4fab115804670e0fb7aedb4b57075a8b6f80052bdc648d3c005184e5"},
+]
 
 [[package]]
 name = "multidict"
@@ -1841,4 +1882,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "20560fd29883aa001ac2f4ccc57fc1b2f7c6c84352219a487d2adcdb4e9bd395"
+content-hash = "abc215e6994a3d3e6d51829d9253e6f9e2b0f77f85d5c2f225e78ad5422296db"

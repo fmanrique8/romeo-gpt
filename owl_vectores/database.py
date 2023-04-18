@@ -4,19 +4,19 @@ import redis
 import pandas as pd
 import numpy as np
 import typing as t
+import logging
 
 from redis.commands.search.query import Query
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.field import VectorField, TextField, NumericField
 
-INDEX_NAME = "embedding-index"
 NUM_VECTORS = 4000
 PREFIX = "embedding"
 VECTOR_DIM = 1536
 DISTANCE_METRIC = "COSINE"
 
 
-def create_index(redis_conn: redis.Redis):
+def create_index(redis_conn: redis.Redis, INDEX_NAME: str):
     document_name = TextField(name="document_name")
     text_chunks = TextField(name="text_chunks")
     vector_score = NumericField(name="vector_score")
@@ -31,10 +31,16 @@ def create_index(redis_conn: redis.Redis):
         },
     )
 
-    redis_conn.ft(INDEX_NAME).create_index(
-        fields=[document_name, text_chunks, embedding, vector_score],
-        definition=IndexDefinition(prefix=[PREFIX], index_type=IndexType.HASH),
-    )
+    try:
+        redis_conn.ft(INDEX_NAME).create_index(
+            fields=[document_name, text_chunks, embedding, vector_score],
+            definition=IndexDefinition(prefix=[PREFIX], index_type=IndexType.HASH),
+        )
+    except redis.exceptions.ResponseError as e:
+        if "Index already exists" in str(e):
+            logging.warning(f"Index {INDEX_NAME} already exists.")
+        else:
+            raise e
 
 
 def process_doc(doc) -> dict:
@@ -51,7 +57,7 @@ def process_doc(doc) -> dict:
     return d
 
 
-def index_documents(redis_conn: redis.Redis, df: pd.DataFrame):
+def index_documents(redis_conn: redis.Redis, df: pd.DataFrame, INDEX_NAME: str):
     pipe = redis_conn.pipeline()
     for index, row in df.iterrows():
         key = f"{PREFIX}:{row['vector_id']}"
@@ -69,13 +75,19 @@ def index_documents(redis_conn: redis.Redis, df: pd.DataFrame):
     pipe.execute()
 
 
-def load_documents(redis_conn: redis.Redis, df: pd.DataFrame):
+def load_documents(
+    redis_conn: redis.Redis,
+    df: pd.DataFrame,
+    INDEX_NAME: str,
+):
     print(f"Indexing {len(df)} Documents")
-    index_documents(redis_conn, df)
+    index_documents(redis_conn, df, INDEX_NAME)
     print("Redis Vector Index Created!")
 
 
-def list_docs(redis_conn: redis.Redis, k: int = NUM_VECTORS) -> pd.DataFrame:
+def list_docs(
+    redis_conn: redis.Redis, INDEX_NAME: str, k: int = NUM_VECTORS
+) -> pd.DataFrame:
     """
     List documents stored in Redis
     Args:
@@ -92,6 +104,7 @@ def list_docs(redis_conn: redis.Redis, k: int = NUM_VECTORS) -> pd.DataFrame:
 
 def search_redis(
     redis_conn: redis.Redis,
+    INDEX_NAME: str,
     query_vector: t.List[float],
     return_fields: list = [],
     k: int = 5,
@@ -117,13 +130,4 @@ def init():
         password=os.getenv("REDIS_PASSWORD", None),
         decode_responses=False,
     )
-    # Check index existence
-    try:
-        redis_conn.execute_command("FT.INFO", INDEX_NAME)
-        print("Index exists")
-    except redis.exceptions.ResponseError:
-        print("Index does not exist")
-        print("Creating embeddings index")
-        # Create index
-        create_index(redis_conn)
     return redis_conn
