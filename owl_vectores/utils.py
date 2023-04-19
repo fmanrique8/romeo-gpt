@@ -116,7 +116,11 @@ def primary_processor(df, api_key):
     def assign_vector_id():
         return list(range(len(df)))
 
-    df["text_embeddings"] = df["text_chunks"].apply(embed_text)
-    df["document_name_embeddings"] = df["document_name"].apply(embed_text)
+    df["text_embeddings"] = df["text_chunks"].apply(
+        lambda x: embed_text(x, model="text-embedding-ada-002")
+    )
+    df["document_name_embeddings"] = df["document_name"].apply(
+        lambda x: embed_text(x, model="text-embedding-ada-002")
+    )
     df["vector_id"] = assign_vector_id()
     return df

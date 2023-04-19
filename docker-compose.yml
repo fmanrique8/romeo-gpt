@@ -7,14 +7,14 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - vector-db
+      - owl-vectores-db
     env_file:
       - .env
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - REDIS_HOST=vector-db
+      - REDIS_HOST=owl-vectores-db
 
-  vector-db:
+  owl-vectores-db:
     image: redis/redis-stack:latest
     ports:
       - 6379:6379
@@ -22,7 +22,7 @@ services:
     environment:
       - REDISEARCH_ARGS=CONCURRENT_WRITE_MODE
     volumes:
-      - vector-db:/var/lib/redis
+      - owl-vectores-db:/var/lib/redis
     healthcheck:
       test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6379", "ping"]
       interval: 2s
@@ -31,5 +31,5 @@ services:
       start_period: 5s
 
 volumes:
-  vector-db:
+  owl-vectores-db:
 
