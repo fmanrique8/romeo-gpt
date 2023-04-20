@@ -1,24 +1,26 @@
 # owl-vectores/owl_vectores/app.py
 import os
-from typing import List
-
-from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
+from uuid import uuid4
 from pydantic import BaseModel
-from langdetect import detect
-
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from typing import List
+from dotenv import load_dotenv
 from owl_vectores.database import (
     init,
     load_documents,
     search_redis,
+    list_docs,
     create_index,
 )
 from owl_vectores.utils import intermediate_processor, primary_processor
 from owl_vectores.models import get_embedding, get_completion
+from langdetect import detect
 import logging
 
 load_dotenv(".env")
+session_id = str(uuid4())
+index_name = f"index-{session_id}"
 documents_uploaded = False
 app = FastAPI()
 
@@ -36,6 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 redis_conn = init()
 
 
@@ -51,7 +54,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
     df = intermediate_processor(file_contents)
     df = primary_processor(df, API_KEY)
 
-    create_index(redis_conn)
+    create_index(redis_conn, index_name)
     load_documents(redis_conn, df)
     documents_uploaded = True
 
@@ -77,15 +80,17 @@ async def ask_question(q: Question):
 
     query_vector = get_embedding(question, API_KEY)
 
+    all_documents = list_docs(redis_conn, index_name)
+
     search_results = search_redis(
         redis_conn,
+        index_name,
         query_vector,
         return_fields=["document_name", "text_chunks"],
-        question=question,
     )
 
     if len(search_results) == 0:
-        raise HTTPException(status_code=404, detail="No relevant documents found")
+        search_results = all_documents
 
     relevant_doc = search_results[0]
 

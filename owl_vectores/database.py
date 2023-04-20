@@ -11,13 +11,12 @@ from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.field import VectorField, TextField, NumericField
 
 NUM_VECTORS = 4000
-INDEX_NAME = "Owl Vectores"
 PREFIX = "embedding"
 VECTOR_DIM = 1536
 DISTANCE_METRIC = "COSINE"
 
 
-def create_index(redis_conn: redis.Redis):
+def create_index(redis_conn: redis.Redis, index_name: str):
     document_name = TextField(name="document_name")
     text_chunks = TextField(name="text_chunks")
     vector_score = NumericField(name="vector_score")
@@ -33,7 +32,7 @@ def create_index(redis_conn: redis.Redis):
     )
 
     try:
-        redis_conn.ft(INDEX_NAME).create_index(
+        redis_conn.ft(index_name).create_index(
             fields=[
                 document_name,
                 text_chunks,
@@ -44,7 +43,7 @@ def create_index(redis_conn: redis.Redis):
         )
     except redis.exceptions.ResponseError as e:
         if "Index already exists" in str(e):
-            logging.warning(f"Index {INDEX_NAME} already exists.")
+            logging.warning(f"Index {index_name} already exists.")
         else:
             raise e
 
@@ -82,12 +81,24 @@ def load_documents(redis_conn: redis.Redis, df: pd.DataFrame):
     print("Redis Vector Index Created!")
 
 
+def list_docs(
+    redis_conn: redis.Redis,
+    index_name: str,
+    k: int = NUM_VECTORS,
+) -> list[dict]:
+    base_query = f"*"
+    return_fields = ["document_name", "text_chunks"]
+    query = Query(base_query).paging(0, k).return_fields(*return_fields).dialect(2)
+    results = redis_conn.ft(index_name).search(query)
+    return [process_doc(doc) for doc in results.docs]
+
+
 def search_redis(
     redis_conn: redis.Redis,
+    index_name: str,
     query_vector: t.List[float],
     return_fields=None,
     k: int = 5,
-    question: t.Optional[str] = None,
 ) -> t.List[dict]:
     if return_fields is None:
         return_fields = []
@@ -100,29 +111,7 @@ def search_redis(
         .dialect(2)
     )
     params_dict = {"vector": np.array(query_vector, dtype=np.float64).tobytes()}
-    results = redis_conn.ft(INDEX_NAME).search(query, params_dict)
-
-    processed_results = [process_doc(doc) for doc in results.docs]
-
-    if not processed_results and question:
-        processed_results = search_semantic_similarity(
-            redis_conn, question, return_fields, k
-        )
-
-    return processed_results
-
-
-def search_semantic_similarity(
-    redis_conn: redis.Redis,
-    question: str,
-    return_fields=None,
-    k: int = 5,
-) -> t.List[dict]:
-    if return_fields is None:
-        return_fields = []
-    base_query = question
-    query = Query(base_query).return_fields(*return_fields).paging(0, k).dialect(2)
-    results = redis_conn.ft(INDEX_NAME).search(query)
+    results = redis_conn.ft(index_name).search(query, params_dict)
     return [process_doc(doc) for doc in results.docs]
 
 
