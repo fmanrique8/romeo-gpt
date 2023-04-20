@@ -1,10 +1,13 @@
 # owl-vectores/owl_vectores/app.py
 import os
-from pydantic import BaseModel
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+
 from dotenv import load_dotenv
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from langdetect import detect
+
 from owl_vectores.database import (
     init,
     load_documents,
@@ -13,10 +16,10 @@ from owl_vectores.database import (
 )
 from owl_vectores.utils import intermediate_processor, primary_processor
 from owl_vectores.models import get_embedding, get_completion
-from langdetect import detect
 import logging
 
 load_dotenv(".env")
+documents_uploaded = False
 app = FastAPI()
 
 API_KEY = os.environ["OPENAI_API_KEY"]
@@ -38,6 +41,7 @@ redis_conn = init()
 
 @app.post("/upload-files/")
 async def upload_files(files: List[UploadFile] = File(...)):
+    global documents_uploaded
     file_contents = []
 
     for file in files:
@@ -49,6 +53,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
     create_index(redis_conn)
     load_documents(redis_conn, df)
+    documents_uploaded = True
 
     return {"status": "success", "message": "Files uploaded and stored in Redis"}
 
@@ -59,6 +64,11 @@ class Question(BaseModel):
 
 @app.post("/ask-question/")
 async def ask_question(q: Question):
+    global documents_uploaded
+    if not documents_uploaded:
+        raise HTTPException(
+            status_code=400, detail="Please upload a document before asking a question"
+        )
     question = q.question
     if not question:
         raise HTTPException(status_code=400, detail="Please provide a question")
