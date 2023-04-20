@@ -82,22 +82,12 @@ def load_documents(redis_conn: redis.Redis, df: pd.DataFrame):
     print("Redis Vector Index Created!")
 
 
-def list_docs(
-    redis_conn: redis.Redis,
-    k: int = NUM_VECTORS,
-) -> list[dict]:
-    base_query = f"*"
-    return_fields = ["document_name", "text_chunks"]
-    query = Query(base_query).paging(0, k).return_fields(*return_fields).dialect(2)
-    results = redis_conn.ft(INDEX_NAME).search(query)
-    return [process_doc(doc) for doc in results.docs]
-
-
 def search_redis(
     redis_conn: redis.Redis,
     query_vector: t.List[float],
     return_fields=None,
     k: int = 5,
+    question: t.Optional[str] = None,
 ) -> t.List[dict]:
     if return_fields is None:
         return_fields = []
@@ -111,6 +101,28 @@ def search_redis(
     )
     params_dict = {"vector": np.array(query_vector, dtype=np.float64).tobytes()}
     results = redis_conn.ft(INDEX_NAME).search(query, params_dict)
+
+    processed_results = [process_doc(doc) for doc in results.docs]
+
+    if not processed_results and question:
+        processed_results = search_semantic_similarity(
+            redis_conn, question, return_fields, k
+        )
+
+    return processed_results
+
+
+def search_semantic_similarity(
+    redis_conn: redis.Redis,
+    question: str,
+    return_fields=None,
+    k: int = 5,
+) -> t.List[dict]:
+    if return_fields is None:
+        return_fields = []
+    base_query = question
+    query = Query(base_query).return_fields(*return_fields).paging(0, k).dialect(2)
+    results = redis_conn.ft(INDEX_NAME).search(query)
     return [process_doc(doc) for doc in results.docs]
 
 

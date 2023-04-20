@@ -9,7 +9,6 @@ from owl_vectores.database import (
     init,
     load_documents,
     search_redis,
-    list_docs,
     create_index,
 )
 from owl_vectores.utils import intermediate_processor, primary_processor
@@ -33,7 +32,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 redis_conn = init()
 
@@ -69,16 +67,15 @@ async def ask_question(q: Question):
 
     query_vector = get_embedding(question, API_KEY)
 
-    all_documents = list_docs(redis_conn)
-
     search_results = search_redis(
         redis_conn,
         query_vector,
         return_fields=["document_name", "text_chunks"],
+        question=question,
     )
 
     if len(search_results) == 0:
-        search_results = all_documents
+        raise HTTPException(status_code=404, detail="No relevant documents found")
 
     relevant_doc = search_results[0]
 
