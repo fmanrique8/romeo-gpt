@@ -2,6 +2,14 @@
 import openai
 import numpy as np
 import warnings
+import yaml
+
+with open("config.yml", "r") as config_file:
+    config = yaml.safe_load(config_file)
+
+EMBEDDING_MODEL = config["models"]["embedding"]["model"]
+COMPLETION_MODEL = config["models"]["completion"]["model"]
+MAX_TOKENS = config["models"]["completion"]["max_tokens"]
 
 
 def get_embedding(text, api_key, model="text-embedding-ada-002"):
