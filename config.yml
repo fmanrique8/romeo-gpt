@@ -1,0 +1,14 @@
+#owl-vectores/config.yml
+redis:
+  host: owl-vectores-db
+  port: 6379
+  password: null
+cors:
+  allowed_origins:
+    - http://localhost:3000
+models:
+  embedding:
+    model: text-embedding-ada-002
+  completion:
+    model: text-davinci-002
+    max_tokens: 100

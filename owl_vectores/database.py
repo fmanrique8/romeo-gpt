@@ -1,5 +1,5 @@
 # owl-vectores/owl_vectores/database.py
-import os
+import yaml
 import redis
 import pandas as pd
 import numpy as np
@@ -116,10 +116,13 @@ def search_redis(
 
 
 def init():
+    with open("config.yml", "r") as config_file:
+        config = yaml.safe_load(config_file)
+
     redis_conn = redis.Redis(
-        host=os.getenv("REDIS_HOST", "vector-db"),
-        port=os.getenv("REDIS_PORT", 6379),
-        password=os.getenv("REDIS_PASSWORD", None),
+        host=config["redis"]["host"],
+        port=config["redis"]["port"],
+        password=config["redis"]["password"],
         decode_responses=False,
     )
     return redis_conn

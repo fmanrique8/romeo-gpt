@@ -5,11 +5,13 @@ services:
   fastapi-app:
     build: .
     ports:
-      - 8000:8000
+      - "8000:8000"
     depends_on:
       - owl-vectores-db
     env_file:
       - .env
+    volumes:
+      - ./config.yml:/owl_vectores/config.yml
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - REDIS_HOST=owl-vectores-db
@@ -17,8 +19,8 @@ services:
   owl-vectores-db:
     image: redis/redis-stack:latest
     ports:
-      - 6379:6379
-      - 8001:8001
+      - "6379:6379"
+      - "8001:8001"
     environment:
       - REDISEARCH_ARGS=CONCURRENT_WRITE_MODE
     volumes:
@@ -32,4 +34,3 @@ services:
 
 volumes:
   owl-vectores-db:
-

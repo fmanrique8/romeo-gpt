@@ -1,5 +1,6 @@
 # owl-vectores/owl_vectores/app.py
 import os
+import yaml
 from uuid import uuid4
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -19,16 +20,21 @@ from langdetect import detect
 import logging
 
 load_dotenv(".env")
+documents_uploaded = False
+
 session_id = str(uuid4())
 index_name = f"index-{session_id}"
-documents_uploaded = False
+
 app = FastAPI()
 
 API_KEY = os.environ["OPENAI_API_KEY"]
 
 logging.basicConfig(filename="ask_question.log", level=logging.INFO)
 
-ALLOWED_ORIGINS = ["http://localhost:3000"]  # Replace with your front end link
+with open("config.yml", "r") as config_file:
+    config = yaml.safe_load(config_file)
+
+ALLOWED_ORIGINS = config["cors"]["allowed_origins"]  # Replace with your front end link
 
 app.add_middleware(
     CORSMiddleware,
