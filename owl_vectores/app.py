@@ -1,5 +1,6 @@
 # owl-vectores/owl_vectores/app.py
 import os
+import json
 import yaml
 from uuid import uuid4
 from pydantic import BaseModel
@@ -105,6 +106,20 @@ async def ask_question(q: Question):
     prompt = f"As an AI assistant, I have analyzed the following text chunks from the most relevant document to answer your question in {language}:\n\n{text_chunks}\n\nYour question: {question}\n\nAnswer:"
 
     answer = get_completion(prompt=prompt, api_key=API_KEY)
+
+    log_data = {
+        "session_id": session_id,
+        "question_asked": question,
+        "question_embedded": query_vector.tolist(),
+        "document_uploaded": documents_uploaded,
+        "text_chunks": text_chunks,
+        "text_embedded": [
+            emb.tolist() for emb in relevant_doc.get("text_embeddings", [])
+        ],
+        "answer": answer,
+    }
+    log_key = f"log:{uuid4()}"
+    redis_conn.execute_command("JSON.SET", log_key, ".", json.dumps(log_data))
 
     return {"question": question, "answer": answer}
 
