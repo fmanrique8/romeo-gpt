@@ -2,12 +2,20 @@
 import os
 import json
 import yaml
+import logging
+
 from uuid import uuid4
+from langdetect import detect
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from dotenv import load_dotenv
+
+from owl_vectores.preprocess import intermediate_processor, primary_processor
+from owl_vectores.utils.agents.prompt_template import get_prompt
+from owl_vectores.models import get_embedding, get_completion
+
 from owl_vectores.database import (
     init,
     load_documents,
@@ -15,20 +23,17 @@ from owl_vectores.database import (
     list_docs,
     create_index,
 )
-from owl_vectores.utils import intermediate_processor, primary_processor
-from owl_vectores.models import get_embedding, get_completion
-from langdetect import detect
-import logging
 
 load_dotenv(".env")
-documents_uploaded = False
+API_KEY = os.environ["OPENAI_API_KEY"]
 
 session_id = str(uuid4())
 index_name = f"index-{session_id}"
+documents_uploaded = False
+
 
 app = FastAPI()
 
-API_KEY = os.environ["OPENAI_API_KEY"]
 
 logging.basicConfig(filename="ask_question.log", level=logging.INFO)
 
@@ -103,7 +108,7 @@ async def ask_question(q: Question):
 
     text_chunks = relevant_doc["text_chunks"]
 
-    prompt = f"As an AI assistant, I have analyzed the following text chunks from the most relevant document to answer your question in {language}:\n\n{text_chunks}\n\nYour question: {question}\n\nAnswer:"
+    prompt = get_prompt(language, text_chunks, question)
 
     answer = get_completion(prompt=prompt, api_key=API_KEY)
 
