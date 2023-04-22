@@ -6,6 +6,8 @@ redis:
 cors:
   allowed_origins:
     - http://localhost:3000
+    - https://b6d5-2600-4041-41f1-2300-541d-2522-b4f8-cb73.ngrok.io
+    - https://romeo-gpt.vercel.app
 models:
   embedding:
     model: text-embedding-ada-002
