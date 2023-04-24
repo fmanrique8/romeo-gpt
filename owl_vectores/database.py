@@ -52,6 +52,16 @@ def create_index(redis_conn: redis.Redis, index_name: str):
             raise e
 
 
+def create_json_index(redis_conn: redis.Redis, index_name: str):
+    try:
+        redis_conn.execute_command("JSON.INDEX", "ADD", index_name, "*", "log_data")
+    except redis.exceptions.ResponseError as e:
+        if "Index already exists" in str(e):
+            logging.warning(f"JSON Index {index_name} already exists.")
+        else:
+            raise e
+
+
 def process_doc(doc) -> dict:
     d = doc.__dict__
     if "vector_score" in d:
