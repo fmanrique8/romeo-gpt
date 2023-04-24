@@ -1,57 +1,24 @@
 # owl-vectores/owl_vectores/app.py
-import os
 import json
-import yaml
-import logging
-
 from uuid import uuid4
 from langdetect import detect
 from pydantic import BaseModel
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import File, UploadFile, HTTPException
 from typing import List
-from dotenv import load_dotenv
 
 from owl_vectores.preprocess import intermediate_processor, primary_processor
 from owl_vectores.utils.agents.prompt_template import get_prompt
 from owl_vectores.models import get_embedding, get_completion
+from owl_vectores.config import app, API_KEY, session_id, index_name, redis_conn
 
 from owl_vectores.database import (
-    init,
     load_documents,
     search_redis,
     list_docs,
     create_index,
 )
 
-load_dotenv(".env")
-API_KEY = os.environ["OPENAI_API_KEY"]
-
-session_id = str(uuid4())
-index_name = f"index-{session_id}"
 documents_uploaded = False
-
-
-app = FastAPI()
-
-
-logging.basicConfig(filename="ask_question.log", level=logging.INFO)
-
-with open("config.yml", "r") as config_file:
-    config = yaml.safe_load(config_file)
-
-ALLOWED_ORIGINS = config["cors"]["allowed_origins"]  # Replace with your front end link
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-redis_conn = init()
 
 
 @app.post("/upload-files/")
