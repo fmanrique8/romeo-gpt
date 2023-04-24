@@ -1,4 +1,4 @@
-# owl-vectores/owl_vectores/database.py
+# romeo-gtp/romeo_gpt/database.py
 import yaml
 import redis
 import pandas as pd

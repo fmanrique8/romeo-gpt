@@ -1,4 +1,5 @@
-# owl-vectores/owl_vectores/utils/connectors/extract_pdf.py
+# romeo-gpt/romeo_gpt/utils/connectors
+
 import io
 from PyPDF2 import PdfReader
 import warnings

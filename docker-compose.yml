@@ -1,22 +1,22 @@
-#owl-vectores/docker-compose.yml
+#romeo-gpt/docker-compose.yml
 version: '3.9'
 services:
 
-  fastapi-app:
+  app:
     build: .
     ports:
       - "8000:8000"
     depends_on:
-      - owl-vectores-db
+      - romeo-db
     env_file:
       - .env
     volumes:
-      - ./config.yml:/owl_vectores/config.yml
+      - ./config.yml:/romeo_gpt/config.yml
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - REDIS_HOST=owl-vectores-db
+      - REDIS_HOST=romeo-db
 
-  owl-vectores-db:
+  romeo-db:
     image: redis/redis-stack:latest
     ports:
       - "6379:6379"
@@ -24,7 +24,7 @@ services:
     environment:
       - REDISEARCH_ARGS=CONCURRENT_WRITE_MODE
     volumes:
-      - owl-vectores-db:/var/lib/redis
+      - romeo-db:/var/lib/redis
     healthcheck:
       test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6379", "ping"]
       interval: 2s
@@ -33,5 +33,5 @@ services:
       start_period: 5s
 
 volumes:
-  owl-vectores-db:
+  romeo-db:
 

@@ -1,3 +1,4 @@
+# romeo-gtp/romeo_gpt/utils/connectors/extract_pdf.py
 import io
 from PyPDF2 import PdfReader
 import warnings

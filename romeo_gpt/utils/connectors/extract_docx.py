@@ -1,4 +1,4 @@
-# owl-vectores/owl_vectores/utils/connectors/extract_docx.py
+# romeo-gtp/romeo_gpt/utils/connectors/extract_docx.py
 import io
 from docx import Document
 from docx.opc.exceptions import PackageNotFoundError

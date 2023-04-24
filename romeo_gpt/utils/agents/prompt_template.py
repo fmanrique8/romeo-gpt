@@ -1,4 +1,4 @@
-# owl-vectores/owl_vectores/utils/agents/prompt_template.py
+# romeo-gtp/romeo_gpt/utils/agents/prompt_template.py
 
 
 def get_prompt(language, text_chunks, question):

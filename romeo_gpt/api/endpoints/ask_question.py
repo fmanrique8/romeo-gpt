@@ -1,20 +1,20 @@
-# owl-vectores/owl_vectores/api/endpoints/ask_question.py
+# romeo-gtp/romeo_gpt/api/endpoints/ask_question.py
 import json
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from uuid import uuid4
 from langdetect import detect
-from owl_vectores import (
+from romeo_gpt import (
     API_KEY,
     redis_conn,
     index_name,
     session_id,
     question_key_prefix,
 )
-from owl_vectores.models import get_embedding, get_completion
-from owl_vectores.database import search_redis, list_docs
-from owl_vectores.utils.agents.prompt_template import get_prompt
+from romeo_gpt.models import get_embedding, get_completion
+from romeo_gpt.database import search_redis, list_docs
+from romeo_gpt.utils.agents.prompt_template import get_prompt
 
 
 class Question(BaseModel):

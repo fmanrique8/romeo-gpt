@@ -1,8 +1,8 @@
-# owl-vectores/owl_vectores/utils.py
+# romeo-gtp/romeo_gpt/utils.py
 import openai
 import pandas as pd
 import warnings
-from owl_vectores.models import get_embedding
+from romeo_gpt.models import get_embedding
 from langchain.text_splitter import TokenTextSplitter
 
 from .utils.connectors.extract_pdf import extract_text_from_pdf

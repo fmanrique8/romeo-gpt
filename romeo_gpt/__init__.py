@@ -2,7 +2,7 @@ import yaml
 from dotenv import load_dotenv
 import os
 from uuid import uuid4
-from owl_vectores.database import init
+from romeo_gpt.database import init
 
 # Load configuration from YAML file
 with open("config.yml", "r") as config_file:

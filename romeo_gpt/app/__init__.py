@@ -1,8 +1,8 @@
-# owl-vectores/owl_vectores/app/__init__.py
+# romeo-gtp/romeo_gpt/app/__init__.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from owl_vectores.api import router
-from owl_vectores import ALLOWED_ORIGINS
+from romeo_gpt.api import router
+from romeo_gpt import ALLOWED_ORIGINS
 
 app = FastAPI()
 

@@ -1,6 +1,6 @@
 FROM python:3.10
 
-WORKDIR /owl_vectores
+WORKDIR /romeo_gpt
 
 COPY pyproject.toml poetry.lock ./
 
@@ -9,8 +9,8 @@ RUN pip install --no-cache-dir poetry && \
     pip install --no-cache-dir -r requirements.txt && \
     rm requirements.txt
 
-COPY owl_vectores owl_vectores
+COPY romeo_gpt romeo_gpt
 
 EXPOSE 8000
 
-CMD ["uvicorn", "owl_vectores.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "romeo_gpt.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "owl-vectores"
+name = "romeo-gpt"
 version = "0.1.0"
 description = ""
 authors = ["felipe.manrique <pmanrique001@gmail.com>"]
 readme = "README.md"
-packages = [{include = "owl_vectores"}]
+packages = [{include = "romeo_gpt"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
