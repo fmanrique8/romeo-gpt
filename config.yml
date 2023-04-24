@@ -1,6 +1,6 @@
-#owl-vectores/config.yml
+#romeo-gpt/config.yml
 redis:
-  host: owl-vectores-db
+  host: romeo-db
   port: 6379
   password: null
 

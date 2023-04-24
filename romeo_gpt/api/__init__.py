@@ -1,4 +1,4 @@
-# owl-vectores/owl_vectores/api/__init__.py
+# romeo-gtp/romeo_gpt/api/__init__.py
 from fastapi import APIRouter
 
 from .endpoints.upload_files import router as upload_files_router

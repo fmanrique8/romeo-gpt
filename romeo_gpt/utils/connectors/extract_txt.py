@@ -1,4 +1,4 @@
-# owl-vectores/owl_vectores/utils/connectors/extract_txt.py
+# romeo-gtp/romeo_gpt/utils/connectors/extract_txt.py
 import io
 from chardet.universaldetector import UniversalDetector
 import warnings

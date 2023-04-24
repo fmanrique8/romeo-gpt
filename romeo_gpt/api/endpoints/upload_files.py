@@ -1,11 +1,11 @@
-# owl-vectores/owl_vectores/api/endpoints/upload_files.py
+# romeo-gtp/romeo_gpt/api/endpoints/upload_files.py
 import json
 from fastapi import File, UploadFile, APIRouter
 from typing import List
 
-from owl_vectores.preprocess import intermediate_processor, primary_processor
-from owl_vectores import API_KEY, redis_conn, index_name, session_id
-from owl_vectores.database import (
+from romeo_gpt.preprocess import intermediate_processor, primary_processor
+from romeo_gpt import API_KEY, redis_conn, index_name, session_id
+from romeo_gpt.database import (
     load_documents,
     create_index,
 )

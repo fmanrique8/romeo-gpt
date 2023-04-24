@@ -1,4 +1,4 @@
-# owl-vectores/owl_vectores/models.py
+# romeo-gtp/romeo_gpt/models.py
 import openai
 import numpy as np
 import warnings
