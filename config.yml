@@ -3,14 +3,20 @@ redis:
   host: owl-vectores-db
   port: 6379
   password: null
+
 cors:
   allowed_origins:
     - http://localhost:3000
-    - https://b6d5-2600-4041-41f1-2300-541d-2522-b4f8-cb73.ngrok.io
-    - https://romeo-gpt.vercel.app
+
 models:
   embedding:
     model: text-embedding-ada-002
   completion:
     model: text-davinci-002
     max_tokens: 100
+
+vector_settings:
+  num_vectors: 4000
+  prefix: "embedding"
+  vector_dim: 1536
+  distance_metric: "COSINE"

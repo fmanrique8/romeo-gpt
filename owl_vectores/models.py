@@ -4,15 +4,17 @@ import numpy as np
 import warnings
 import yaml
 
+# Load and parse the config.yml file
 with open("config.yml", "r") as config_file:
     config = yaml.safe_load(config_file)
 
-EMBEDDING_MODEL = config["models"]["embedding"]["model"]
-COMPLETION_MODEL = config["models"]["completion"]["model"]
-MAX_TOKENS = config["models"]["completion"]["max_tokens"]
+# Set model and max_tokens from the config.yml file
+embedding_model = config["models"]["embedding"]["model"]
+completion_model = config["models"]["completion"]["model"]
+max_tokens = config["models"]["completion"]["max_tokens"]
 
 
-def get_embedding(text, api_key, model="text-embedding-ada-002"):
+def get_embedding(text, api_key, model=embedding_model):
     openai.api_key = api_key
     try:
         if text is None or len(text) == 0:
@@ -26,7 +28,7 @@ def get_embedding(text, api_key, model="text-embedding-ada-002"):
         return None
 
 
-def get_completion(prompt, api_key, model="text-davinci-002", max_tokens=100):
+def get_completion(prompt, api_key, model=completion_model):
     openai.api_key = api_key
     try:
         response = openai.Completion.create(

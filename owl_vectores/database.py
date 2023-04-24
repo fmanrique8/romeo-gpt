@@ -10,10 +10,14 @@ from redis.commands.search.query import Query
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.field import VectorField, TextField, NumericField
 
-NUM_VECTORS = 4000
-PREFIX = "embedding"
-VECTOR_DIM = 1536
-DISTANCE_METRIC = "COSINE"
+with open("config.yml", "r") as vector_settings:
+    CONFIG = yaml.safe_load(vector_settings)
+
+
+NUM_VECTORS = CONFIG["vector_settings"]["num_vectors"]
+PREFIX = CONFIG["vector_settings"]["prefix"]
+VECTOR_DIM = CONFIG["vector_settings"]["vector_dim"]
+DISTANCE_METRIC = CONFIG["vector_settings"]["distance_metric"]
 
 
 def create_index(redis_conn: redis.Redis, index_name: str):
@@ -116,8 +120,8 @@ def search_redis(
 
 
 def init():
-    with open("config.yml", "r") as config_file:
-        config = yaml.safe_load(config_file)
+    with open("config.yml", "r") as redis_config:
+        config = yaml.safe_load(redis_config)
 
     redis_conn = redis.Redis(
         host=config["redis"]["host"],
