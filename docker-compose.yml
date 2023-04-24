@@ -34,3 +34,4 @@ services:
 
 volumes:
   owl-vectores-db:
+
