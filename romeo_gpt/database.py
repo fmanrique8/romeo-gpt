@@ -10,6 +10,7 @@ from redis.commands.search.query import Query
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.field import VectorField, TextField, NumericField
 
+
 with open("config.yml", "r") as vector_settings:
     CONFIG = yaml.safe_load(vector_settings)
 
@@ -48,16 +49,6 @@ def create_index(redis_conn: redis.Redis, index_name: str):
     except redis.exceptions.ResponseError as e:
         if "Index already exists" in str(e):
             logging.warning(f"Index {index_name} already exists.")
-        else:
-            raise e
-
-
-def create_json_index(redis_conn: redis.Redis, index_name: str):
-    try:
-        redis_conn.execute_command("JSON.INDEX", "ADD", index_name, "*", "log_data")
-    except redis.exceptions.ResponseError as e:
-        if "Index already exists" in str(e):
-            logging.warning(f"JSON Index {index_name} already exists.")
         else:
             raise e
 
