@@ -29,7 +29,7 @@ index_name = f"index-{session_id}"
 redis_conn = init()
 
 # Question prefix
-question_key_prefix = "question"
+task_key_prefix = "task"
 
 # Define the log format
 log_format = (

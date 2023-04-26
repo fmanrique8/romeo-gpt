@@ -1,4 +1,4 @@
-# romeo-gtp/romeo_gpt/api/endpoints/ask_question.py
+# romeo-gtp/romeo_gpt/api/endpoints/create_task.py
 import json
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -10,15 +10,15 @@ from romeo_gpt import (
     redis_conn,
     index_name,
     session_id,
-    question_key_prefix,
+    task_key_prefix,
 )
-from romeo_gpt.models import get_embedding, get_completion
+from romeo_gpt.models import get_embedding
 from romeo_gpt.database import search_redis, list_docs
-from romeo_gpt.utils.agents.prompt_template import get_prompt
+from romeo_gpt.utils.agents.docs_agent import documents_agent
 
 
-class Question(BaseModel):
-    question: str
+class Task(BaseModel):
+    task: str
 
 
 router = APIRouter()
@@ -27,11 +27,11 @@ documents_uploaded = False
 
 
 @router.post("/")
-async def ask_question_endpoint(q: Question):
+async def create_task(t: Task):
     global documents_uploaded
-    question = q.question
-    if not question:
-        raise HTTPException(status_code=400, detail="Please provide a question")
+    task = t.task
+    if not task:
+        raise HTTPException(status_code=400, detail="Please provide a task")
 
     log_key = f"document:{session_id}"
     uploaded_docs = redis_conn.execute_command("JSON.GET", log_key)
@@ -41,12 +41,12 @@ async def ask_question_endpoint(q: Question):
 
     if not documents_uploaded:
         raise HTTPException(
-            status_code=400, detail="Please upload a document before asking a question"
+            status_code=400, detail="Please upload a document before asking a task"
         )
 
-    language = detect(question)
+    language = detect(task)
 
-    query_vector = get_embedding(question, API_KEY)
+    query_vector = get_embedding(task, API_KEY)
 
     all_documents = list_docs(redis_conn, index_name)
 
@@ -64,18 +64,16 @@ async def ask_question_endpoint(q: Question):
 
     text_chunks = relevant_doc["text_chunks"]
 
-    prompt = get_prompt(language, text_chunks, question)
+    answer = documents_agent(language, text_chunks, task, API_KEY)
 
-    answer = get_completion(prompt=prompt, api_key=API_KEY)
-
-    question_key = f"{question_key_prefix}:{uuid4()}"
+    task_key = f"{task_key_prefix}:{uuid4()}"
 
     log_data = {
         "session_id": session_id,
-        "question_asked": question,
-        "question_embedded": query_vector.tolist(),
+        "task_asked": task,
+        "task_embedded": query_vector.tolist(),
         "answer": answer,
     }
-    redis_conn.execute_command("JSON.SET", question_key, ".", json.dumps(log_data))
+    redis_conn.execute_command("JSON.SET", task_key, ".", json.dumps(log_data))
 
-    return {"question": question, "answer": answer}
+    return {"task": task, "answer": answer}
