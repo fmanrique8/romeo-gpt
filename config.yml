@@ -20,3 +20,5 @@ vector_settings:
   prefix: "embedding"
   vector_dim: 1536
   distance_metric: "COSINE"
+
+
