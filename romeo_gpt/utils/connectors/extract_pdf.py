@@ -1,4 +1,3 @@
-# romeo-gtp/romeo_gpt/utils/connectors/extract_pdf.py
 import io
 import warnings
 from PyPDF2 import PdfReader
@@ -6,6 +5,16 @@ from romeo_gpt import logger
 
 
 def extract_text_from_pdf(file_content):
+    """
+    Extract text from a PDF file.
+
+    Args:
+        file_content (bytes): The content of the file.
+
+    Returns:
+        bytes: The extracted text encoded in UTF-8.
+
+    """
     try:
         with io.BytesIO(file_content) as f:
             reader = PdfReader(f)

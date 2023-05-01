@@ -1,43 +1,42 @@
-# romeo-gtp/romeo_gpt/api/endpoints/upload_files.py
-import json
 from fastapi import File, UploadFile, APIRouter
 from typing import List
 
-from romeo_gpt.preprocess import intermediate_processor, primary_processor
-from romeo_gpt import API_KEY, redis_conn, index_name, session_id
-from romeo_gpt.database import (
+from romeo_gpt import API_KEY, redis_conn, index_name
+from romeo_gpt.utils.database.database import (
     load_documents,
     create_index,
 )
 
-router = APIRouter()
+from romeo_gpt.utils.preprocess.preprocess import (
+    intermediate_processor,
+    primary_processor,
+)
 
-documents_uploaded = False
+router = APIRouter()
 
 
 @router.post("/")
 async def upload_files_endpoint(files: List[UploadFile] = File(...)):
-    global documents_uploaded
+    """
+    Endpoint to upload files.
+
+    :param files: List of files to be uploaded.
+    :return: Dictionary containing status and message.
+    """
+
+    # Read the contents of the files and store them in a list
     file_contents = []
 
     for file in files:
         content = await file.read()
         file_contents.append((content, file.filename.split(".")[-1]))
 
+    # Process the file contents using intermediate and primary processors
     df = intermediate_processor(file_contents)
     df = primary_processor(df, API_KEY)
 
+    # Create index in Redis and load documents into the index
     create_index(redis_conn, index_name)
     load_documents(redis_conn, df)
-    documents_uploaded = True
-
-    log_key = f"document:{session_id}"
-    log_data = {
-        "session_id": session_id,
-        "document_uploaded": documents_uploaded,
-        "text_chunks": df["text_chunks"].tolist(),
-        "text_embedded": [emb.tolist() for emb in df.get("text_embeddings", [])],
-    }
-    redis_conn.execute_command("JSON.SET", log_key, ".", json.dumps(log_data))
 
     return {"status": "success", "message": "Files uploaded and stored in Redis"}

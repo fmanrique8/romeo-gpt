@@ -1,4 +1,5 @@
 # romeo-gtp/romeo_gpt/database.py
+import os
 import yaml
 import redis
 import pandas as pd
@@ -6,19 +7,20 @@ import numpy as np
 import typing as t
 import logging
 
+from dotenv import load_dotenv
 from redis.commands.search.query import Query
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.field import VectorField, TextField, NumericField
 
-
-with open("config.yml", "r") as vector_settings:
-    CONFIG = yaml.safe_load(vector_settings)
-
-
-NUM_VECTORS = CONFIG["vector_settings"]["num_vectors"]
-PREFIX = CONFIG["vector_settings"]["prefix"]
-VECTOR_DIM = CONFIG["vector_settings"]["vector_dim"]
-DISTANCE_METRIC = CONFIG["vector_settings"]["distance_metric"]
+from . import (
+    NUM_VECTORS,
+    PREFIX,
+    VECTOR_DIM,
+    DISTANCE_METRIC,
+    redis_host,
+    redis_port,
+    redis_password,
+)
 
 
 def create_index(redis_conn: redis.Redis, index_name: str):
@@ -32,7 +34,7 @@ def create_index(redis_conn: redis.Redis, index_name: str):
             "TYPE": "FLOAT64",
             "DIM": VECTOR_DIM,
             "DISTANCE_METRIC": DISTANCE_METRIC,
-            "INITIAL_CAP": NUM_VECTORS,
+            "INITIAL_CAP": 255,
         },
     )
 
@@ -121,13 +123,9 @@ def search_redis(
 
 
 def init():
-    with open("config.yml", "r") as redis_config:
-        config = yaml.safe_load(redis_config)
-
     redis_conn = redis.Redis(
-        host=config["redis"]["host"],
-        port=config["redis"]["port"],
-        password=config["redis"]["password"],
+        host=redis_host,
+        port=redis_port,
         decode_responses=False,
     )
     return redis_conn
