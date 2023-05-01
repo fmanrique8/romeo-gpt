@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
 
-  redis:
+  romeo-db:
     image: redis/redis-stack:latest
     ports:
       - "6379:6379"
@@ -15,7 +15,7 @@ services:
     environment:
       - REDISEARCH_ARGS=CONCURRENT_WRITE_MODE
     volumes:
-      - redis:/var/lib/redis
+      - romeo-db:/var/lib/redis
     healthcheck:
       test: ["CMD", "redis-cli", "-h", "localhost", "-p", "6379", "ping"]
       interval: 2s

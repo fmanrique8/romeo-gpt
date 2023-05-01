@@ -8,7 +8,7 @@ models:
     model: text-embedding-ada-002
   completion:
     model: text-davinci-002
-    max_tokens: 50
+    max_tokens: 150
 
 vector_settings:
   num_vectors: 4000
