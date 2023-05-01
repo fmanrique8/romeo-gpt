@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir poetry && \
     rm requirements.txt
 
 COPY romeo_gpt romeo_gpt
+COPY config.yml config.yml
+COPY .env .env
 
 EXPOSE 8000
 

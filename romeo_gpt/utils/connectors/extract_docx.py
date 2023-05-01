@@ -6,6 +6,16 @@ from romeo_gpt import logger
 
 
 def extract_text_from_docx(file_content):
+    """
+    Extract text from a DOCX or DOC file.
+
+    Args:
+        file_content (bytes): The content of the file.
+
+    Returns:
+        bytes: The extracted text encoded in UTF-8.
+
+    """
     try:
         with io.BytesIO(file_content) as f:
             text = docx2txt.process(f)

@@ -2,15 +2,15 @@
 import openai
 import pandas as pd
 import warnings
-from romeo_gpt.models import get_embedding
+from romeo_gpt.utils.models.models import get_embedding
 from langchain.text_splitter import TokenTextSplitter
 
-from .utils.connectors.extract_pdf import extract_text_from_pdf
-from .utils.connectors.extract_docx import extract_text_from_docx
-from .utils.connectors.extract_txt import extract_text_from_txt
+from romeo_gpt.utils.connectors.extract_pdf import extract_text_from_pdf
+from romeo_gpt.utils.connectors.extract_docx import extract_text_from_docx
+from romeo_gpt.utils.connectors.extract_txt import extract_text_from_txt
 
 
-def extract_text_from_files(df, file_contents):
+def extract_text_from_files(df, file_contents) -> pd.DataFrame:
     for file_content, file_extension in file_contents:
         if file_extension == "pdf":
             text = extract_text_from_pdf(file_content)
@@ -31,10 +31,10 @@ def extract_text_from_files(df, file_contents):
 def encode_text(text):
     if text is None or len(text) == 0:
         return None
-    return text.replace(b"\n", b" ")
+    return text.decode("utf-8").replace("\n", " ")
 
 
-def split_text_chunks(df):
+def split_text_chunks(df) -> pd.DataFrame:
     text_splitter = TokenTextSplitter(chunk_size=10, chunk_overlap=0)
     df["text_chunks"] = ""
 
@@ -53,13 +53,13 @@ def split_text_chunks(df):
     return df
 
 
-def intermediate_processor(file_contents: list):
+def intermediate_processor(file_contents: list) -> pd.DataFrame:
     df = pd.DataFrame({"document_name": [], "text_extracted": [], "text_chunks": []})
     df = df.pipe(extract_text_from_files, file_contents).pipe(split_text_chunks)
     return df
 
 
-def primary_processor(df, api_key):
+def primary_processor(df, api_key: str) -> pd.DataFrame:
     openai.api_key = api_key
 
     def embed_text(text, model="text-embedding-ada-002"):

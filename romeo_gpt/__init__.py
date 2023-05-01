@@ -3,38 +3,24 @@ import os
 import yaml
 import logging
 import colorlog
-
 from dotenv import load_dotenv
-from uuid import uuid4
-from romeo_gpt.database import init
-
-# Load configuration from YAML file
-with open("config.yml", "r") as config_file:
-    CONFIG = yaml.safe_load(config_file)
-
-# Set global configurations from YAML file
-ALLOWED_ORIGINS = CONFIG["cors"]["allowed_origins"]
+from romeo_gpt.utils.database.database import init
 
 # Load environment variables from .env file
 load_dotenv(".env")
 API_KEY = os.environ["OPENAI_API_KEY"]
-
-# Generate unique session ID
-session_id = str(uuid4())
+REDIS_HOST = os.environ["REDIS_HOST"]
+REDIS_PORT = os.environ["REDIS_PORT"]
+REDIS_PASSWORD = os.environ["REDIS_PASSWORD"]
 
 # Set index name
-index_name = f"index-{session_id}"
+index_name = f"romeo-db-index"
 
 # Initialize Redis connection
 redis_conn = init()
 
-# Question prefix
-task_key_prefix = "task"
-
 # Define the log format
-log_format = (
-    "%(asctime)s - " "%(name)s - " "%(levelname)s - " "%(log_color)s%(message)s"
-)
+log_format = "%(asctime)s - %(name)s - %(levelname)s - %(log_color)s%(message)s"
 
 # Define the colors for different log levels
 colorlog_format = {
@@ -65,10 +51,3 @@ def setup_logger(level=logging.INFO):
 
 
 logger = setup_logger()
-
-# Log messages
-logger.debug("This is a debug message")
-logger.info("This is an info message")
-logger.warning("This is a warning message")
-logger.error("This is an error message")
-logger.critical("This is a critical message")
