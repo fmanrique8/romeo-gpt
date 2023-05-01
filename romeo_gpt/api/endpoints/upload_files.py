@@ -2,11 +2,11 @@ from fastapi import File, UploadFile, APIRouter
 from typing import List
 
 from romeo_gpt import API_KEY, redis_conn, index_name
-from romeo_gpt.utils.database.database import (
+from romeo_gpt.utils.database.db_utils import (
     load_documents,
-    create_index,
 )
 
+from romeo_gpt.utils.database.create_index import create_index
 from romeo_gpt.utils.preprocess.preprocess import (
     intermediate_processor,
     primary_processor,

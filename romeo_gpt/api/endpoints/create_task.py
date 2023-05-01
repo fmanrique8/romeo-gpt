@@ -10,7 +10,8 @@ from romeo_gpt import (
     index_name,
 )
 from romeo_gpt.utils.models.models import get_embedding
-from romeo_gpt.utils.database.database import search_redis, list_docs
+from romeo_gpt.utils.database.search_index import search_index
+from romeo_gpt.utils.database.db_utils import list_docs, delete_index
 from romeo_gpt.utils.agents.docs_agent import documents_agent
 
 
@@ -48,7 +49,7 @@ async def create_task(t: Task):
     all_documents = list_docs(redis_conn, index_name)
 
     # Search Redis for relevant documents
-    search_results = search_redis(
+    search_results = search_index(
         redis_conn,
         index_name,
         query_vector,
@@ -67,6 +68,9 @@ async def create_task(t: Task):
 
     # Use documents_agent to generate an answer
     answer = documents_agent(language, text_chunks, task, API_KEY)
+
+    # Create index in Redis
+    delete_index(redis_conn, index_name)
 
     # Return the task and its answer
     return {"task": task, "answer": answer}

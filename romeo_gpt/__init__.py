@@ -1,10 +1,9 @@
 # romeo-gpt/__init__.py
 import os
-import yaml
 import logging
 import colorlog
 from dotenv import load_dotenv
-from romeo_gpt.utils.database.database import init
+from romeo_gpt.utils.database import init
 
 # Load environment variables from .env file
 load_dotenv(".env")
