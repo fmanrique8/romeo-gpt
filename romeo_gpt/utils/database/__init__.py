@@ -1,5 +1,6 @@
 # romeo_gpt/utils/database/__init__.py
 import os
+import redis
 import yaml
 from dotenv import load_dotenv
 
@@ -14,6 +15,12 @@ DISTANCE_METRIC = CONFIG["vector_settings"]["distance_metric"]
 
 load_dotenv()
 
-redis_host = os.getenv("REDIS_HOST")
-redis_port = os.getenv("REDIS_PORT")
-redis_password = os.getenv("REDIS_PASSWORD")
+
+def init():
+    redis_conn = redis.Redis(
+        host=os.getenv("REDIS_HOST"),
+        port=os.getenv("REDIS_PORT"),
+        password=os.getenv("REDIS_PASSWORD"),
+        decode_responses=False,
+    )
+    return redis_conn
