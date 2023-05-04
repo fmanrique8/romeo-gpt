@@ -1,6 +1,6 @@
 # romeo-gtp/romeo_gpt/api/endpoints/create_task.py
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -22,6 +22,7 @@ log_data_collection = db["create-task-endpoint"]
 # Define Task model with a single 'task' field
 class Task(BaseModel):
     task: str
+    client_ip: str
 
 
 # Create FastAPI router
@@ -30,17 +31,15 @@ router = APIRouter()
 
 # Define create_task endpoint
 @router.post("/")
-async def create_task(request: Request, t: Task):
+async def create_task(t: Task):
     """
     Endpoint to create a task.
 
-    :param request: HTTP request object.
     :param t: Task object containing a task string.
     :return: Dictionary containing the task and its answer.
     """
-
-    # Get the client's IP address
-    client_ip = request.client.host
+    # Get the client's IP address from the input
+    client_ip = t.client_ip
 
     # Set the index_name using the client's IP address
     index_name = f"romeo-db-index-{client_ip}"
