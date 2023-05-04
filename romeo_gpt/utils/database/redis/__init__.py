@@ -19,7 +19,7 @@ def init():
     redis_conn = redis.Redis(
         host=os.getenv("REDIS_HOST"),
         port=os.getenv("REDIS_PORT"),
-        # password=os.getenv("REDIS_PASSWORD"),
+        password=os.getenv("REDIS_PASSWORD"),
         decode_responses=False,
     )
     return redis_conn

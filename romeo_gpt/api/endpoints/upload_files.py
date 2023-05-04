@@ -1,6 +1,6 @@
 # romeo_gpt/api/endpoints/upload_files.py
 import logging
-from fastapi import File, UploadFile, APIRouter, Request
+from fastapi import File, UploadFile, APIRouter
 from typing import List
 from datetime import datetime
 
@@ -25,17 +25,14 @@ def index_exists(index_name):
 
 
 @router.post("/")
-async def upload_files_endpoint(request: Request, files: List[UploadFile] = File(...)):
+async def upload_files_endpoint(client_ip: str, files: List[UploadFile] = File(...)):
     """
     Endpoint to upload files.
 
-    :param request:
+    :param client_ip:
     :param files: List of files to be uploaded.
     :return: Dictionary containing status and message.
     """
-
-    # Get the client's IP address
-    client_ip = request.client.host
 
     # Set the index_name using the client's IP address
     index_name = f"romeo-db-index-{client_ip}"
