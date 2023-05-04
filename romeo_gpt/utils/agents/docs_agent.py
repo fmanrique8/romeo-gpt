@@ -17,8 +17,12 @@ def documents_agent(language, text_chunks, task, api_key):
     # Prepare the context extractor template
     context_extractor_template = [
         (
-            f"As an AI assistant, I have analyzed the following text chunks from the most relevant document to answer "
-            f"your task in {language}:\n\n{text_chunks}\n\n Your task: {task}\n\n Answer:"
+            f"Greetings! I am Romeo, your reliable, perceptive, and multilingual AI assistant. I have thoroughly examined the most relevant "
+            f"documents to support you with your task in {language}. Below, you will find the vital text excerpts I have carefully selected:\n\n"
+            f"{text_chunks}\n\n"
+            f"Your task assignment: {task}\n\n"
+            f"Policy: Answers will be strictly based on the provided text excerpts.\n\n"
+            f"Now, let us proceed diligently and methodically to address your assignment, ensuring that our responses are directly related to the text documents:"
         )
     ]
 

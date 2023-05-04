@@ -5,14 +5,13 @@ import logging
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.field import VectorField, TextField, NumericField
 
-from . import (
-    PREFIX,
+from romeo_gpt.utils.database.redis import (
     VECTOR_DIM,
     DISTANCE_METRIC,
 )
 
 
-def create_index(redis_conn: redis.Redis, index_name: str):
+def create_index(redis_conn: redis.Redis, index_name: str, prefix: str):
     document_name = TextField(name="document_name")
     text_chunks = TextField(name="text_chunks")
     vector_score = NumericField(name="vector_score")
@@ -35,7 +34,7 @@ def create_index(redis_conn: redis.Redis, index_name: str):
                 embedding,
                 vector_score,
             ],
-            definition=IndexDefinition(prefix=[PREFIX], index_type=IndexType.HASH),
+            definition=IndexDefinition(prefix=[prefix], index_type=IndexType.HASH),
         )
     except redis.exceptions.ResponseError as e:
         if "Index already exists" in str(e):

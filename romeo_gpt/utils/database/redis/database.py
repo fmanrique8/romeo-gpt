@@ -4,9 +4,8 @@ import pandas as pd
 
 from redis.commands.search.query import Query
 
-from . import (
+from romeo_gpt.utils.database.redis import (
     NUM_VECTORS,
-    PREFIX,
 )
 
 
@@ -23,10 +22,10 @@ def process_doc(doc) -> dict:
     return d
 
 
-def index_documents(redis_conn: redis.Redis, df: pd.DataFrame):
+def index_documents(redis_conn: redis.Redis, df: pd.DataFrame, prefix: str):
     pipe = redis_conn.pipeline()
     for index, row in df.iterrows():
-        key = f"{PREFIX}:{row['vector_id']}"
+        key = f"{prefix}:{row['vector_id']}"
         document_data = {
             "document_name": row["document_name"],
             "text_chunks": row["text_chunks"],
@@ -37,9 +36,9 @@ def index_documents(redis_conn: redis.Redis, df: pd.DataFrame):
     pipe.execute()
 
 
-def load_documents(redis_conn: redis.Redis, df: pd.DataFrame):
+def load_documents(redis_conn: redis.Redis, df: pd.DataFrame, prefix: str):
     print(f"Indexing {len(df)} Documents")
-    index_documents(redis_conn, df)
+    index_documents(redis_conn, df, prefix)
     print("Redis Vector Index Created!")
 
 
