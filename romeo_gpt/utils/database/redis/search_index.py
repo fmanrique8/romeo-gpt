@@ -4,6 +4,7 @@ import numpy as np
 import typing as t
 
 from redis.commands.search.query import Query
+from .database import process_doc
 
 
 def search_index(

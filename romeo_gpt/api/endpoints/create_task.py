@@ -1,18 +1,22 @@
 # romeo-gtp/romeo_gpt/api/endpoints/create_task.py
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
+from datetime import datetime
 
 from langdetect import detect
 from romeo_gpt import (
     API_KEY,
     redis_conn,
-    index_name,
 )
 from romeo_gpt.utils.models.models import get_embedding
-from romeo_gpt.utils.database.search_index import search_index
-from romeo_gpt.utils.database.db_utils import list_docs, delete_index
+from romeo_gpt.utils.database.redis.search_index import search_index
+from romeo_gpt.utils.database.redis.database import list_docs
 from romeo_gpt.utils.agents.docs_agent import documents_agent
+from romeo_gpt.utils.database.mongodb import db
+
+# Access the MongoDB collection for log_data
+log_data_collection = db["create-task-endpoint"]
 
 
 # Define Task model with a single 'task' field
@@ -23,18 +27,23 @@ class Task(BaseModel):
 # Create FastAPI router
 router = APIRouter()
 
-documents_uploaded = False
-
 
 # Define create_task endpoint
 @router.post("/")
-async def create_task(t: Task):
+async def create_task(request: Request, t: Task):
     """
     Endpoint to create a task.
 
+    :param request: HTTP request object.
     :param t: Task object containing a task string.
     :return: Dictionary containing the task and its answer.
     """
+
+    # Get the client's IP address
+    client_ip = request.client.host
+
+    # Set the index_name using the client's IP address
+    index_name = f"romeo-db-index-{client_ip}"
 
     # Get task from input
     task = t.task
@@ -69,8 +78,17 @@ async def create_task(t: Task):
     # Use documents_agent to generate an answer
     answer = documents_agent(language, text_chunks, task, API_KEY)
 
-    # Create index in Redis
-    delete_index(redis_conn, index_name)
+    # Prepare log_data
+    log_data = {
+        "question_asked": task,
+        "question_embedded": query_vector.tolist(),
+        "answer": answer,
+        "timestamp": datetime.utcnow(),
+        "client_ip": client_ip,
+    }
+
+    # Insert log_data into the MongoDB log_data collection
+    log_data_collection.insert_one(log_data)
 
     # Return the task and its answer
     return {"task": task, "answer": answer}

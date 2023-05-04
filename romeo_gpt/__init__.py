@@ -3,17 +3,11 @@ import os
 import logging
 import colorlog
 from dotenv import load_dotenv
-from romeo_gpt.utils.database import init
+from romeo_gpt.utils.database.redis import init
 
 # Load environment variables from .env file
 load_dotenv(".env")
 API_KEY = os.environ["OPENAI_API_KEY"]
-REDIS_HOST = os.environ["REDIS_HOST"]
-REDIS_PORT = os.environ["REDIS_PORT"]
-REDIS_PASSWORD = os.environ["REDIS_PASSWORD"]
-
-# Set index name
-index_name = f"romeo-db-index"
 
 # Initialize Redis connection
 redis_conn = init()
