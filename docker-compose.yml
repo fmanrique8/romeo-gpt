@@ -22,16 +22,5 @@ services:
       timeout: 1m30s
       retries: 5
       start_period: 5s
-
-  romeo-mongo-db:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - romeo-mongo-db-data:/data/db
-    environment:
-      - MONGO_INITDB_DATABASE=romeo-mongo-db
-
 volumes:
   romeo-db:
-  romeo-mongo-db-data:
