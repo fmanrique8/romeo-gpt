@@ -1,5 +1,6 @@
 # romeo-gtp/romeo_gpt/database.py
 import redis
+import logging
 import pandas as pd
 
 from redis.commands.search.query import Query
@@ -63,3 +64,8 @@ def delete_index(redis_conn: redis.Redis, index_name: str):
             print(f"Index {index_name} does not exist.")
         else:
             raise e
+
+
+def clear_cache(redis_conn: redis.Redis):
+    redis_conn.flushdb()
+    logging.info(f"Cache cleared")

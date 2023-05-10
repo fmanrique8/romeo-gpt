@@ -3,7 +3,7 @@
 ## Romeo GPT: AI-Powered Document Analysis and Management
 
 Romeo GPT is an AI assistant designed to help users manage and analyze a list of documents. The application is built using
-FastAPI, Redisearch, MongoDB, and OpenAI's GPT-4. This combination of technologies provides a powerful, efficient, and secure
+FastAPI, Redisearch, and OpenAI's GPT-4. This combination of technologies provides a powerful, efficient, and secure
 AI-assisted platform for document processing, vector-related object management, and content analysis.
 
 ## Project Requirements and Installation
@@ -23,7 +23,6 @@ Create a .env file in the same directory as the docker-compose.yml file with the
    REDIS_HOST=<your_redis_host>
    REDIS_PORT=<your_redis_port>
    REDIS_PASSWORD=<your_redis_password>
-   MONGODB_URI=<your_mongodb_uri>
    ```
 
 ## Deploying the Application Locally
@@ -40,7 +39,6 @@ This command will build the Docker images and start the containers.
 The application will be available at:
 - FastAPI Server: http://localhost:8000
 - Redis Browser: http://localhost:8001/redis-stack/browser
-- MongoDB Web Interface: http://localhost:27017 (only if you enabled a web interface for MongoDB
 
 
 ## Testing the Application
