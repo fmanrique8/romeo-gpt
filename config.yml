@@ -2,15 +2,13 @@
 cors:
   allowed_origins:
     - http://localhost:3000
-    - https://romeogpt.com
-    - https://romeo-gpt.vercel.app
 
 models:
   embedding:
     model: text-embedding-ada-002
   completion:
     model: text-davinci-002
-    max_tokens: 400
+    max_tokens: 500
 
 
 vector_settings:
