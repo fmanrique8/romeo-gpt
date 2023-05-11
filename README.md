@@ -12,7 +12,7 @@ To run this project, you need to have Docker and Docker Compose installed on you
 
 - Docker installed on your system
 - Python 3.10 or later installed on your system
-- Basic understanding of FastAPI, Redis, and MongoDB
+- Basic understanding of FastAPI and Redis.
 
 ## Environment Variables
 
