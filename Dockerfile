@@ -5,12 +5,9 @@ WORKDIR /romeo_gpt
 
 COPY pyproject.toml poetry.lock ./
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir poetry && \
+RUN pip install --no-cache-dir poetry && \
     poetry export -f requirements.txt --output requirements.txt && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install google-api-python-client && \
-    pip cache purge && \
     rm requirements.txt
 
 COPY romeo_gpt romeo_gpt
