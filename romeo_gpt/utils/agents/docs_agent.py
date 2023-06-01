@@ -1,5 +1,3 @@
-from abc import ABC
-
 from langchain.agents import AgentExecutor, LLMSingleActionAgent, AgentOutputParser
 from langchain.prompts import StringPromptTemplate
 from langchain import OpenAI, LLMChain
@@ -12,11 +10,13 @@ template = """Answer the following question as best you can, using the text chun
 Text Chunks: {text_chunks}
 
 Question: {input}
+
+Begin! The answer should detailed and insightful: 
 {agent_scratchpad}"""
 
 
 # CustomPromptTemplate
-class CustomPromptTemplate(StringPromptTemplate, ABC):
+class CustomPromptTemplate(StringPromptTemplate):
     template: str
     input_variables: List[str] = ["input", "intermediate_steps", "text_chunks"]
 
@@ -37,8 +37,9 @@ prompt = CustomPromptTemplate(
 
 
 # Output Parser
-class CustomOutputParser(AgentOutputParser, ABC):
-    def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
+class CustomOutputParser(AgentOutputParser):
+    @staticmethod
+    def parse(llm_output: str) -> Union[AgentAction, AgentFinish]:
         if "Final Answer:" in llm_output:
             return AgentFinish(
                 return_values={"output": llm_output.split("Final Answer:")[-1].strip()},
@@ -55,7 +56,7 @@ class CustomOutputParser(AgentOutputParser, ABC):
 output_parser = CustomOutputParser()
 
 # Set up LLM
-llm = OpenAI(temperature=0.5)
+llm = OpenAI(temperature=0)
 
 # LLM chain consisting of the LLM and a prompt
 llm_chain = LLMChain(llm=llm, prompt=prompt)
