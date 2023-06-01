@@ -19,11 +19,20 @@ To run this project, you need to have Docker and Docker Compose installed on you
 Create a .env file in the same directory as the docker-compose.yml file with the following variables:
 
    ```
-   OPENAI_API_KEY=<your_openai_api_key>
-   REDIS_HOST=<your_redis_host>
-   REDIS_PORT=<your_redis_port>
-   REDIS_PASSWORD=<your_redis_password>
+  OPENAI_API_KEY=<your_openai_api_key>
+  REDIS_HOST=<your_redis_host>
+  REDIS_PORT=<your_redis_port>
+  REDIS_PASSWORD=<your_redis_password>
+  GOOGLE_API_KEY=<your_google_api_key>
+  GOOGLE_CSE_ID=<your_google_cse_id>
    ```
+## To set up the Google Search API keys:
+
+- First, you need to set up the proper API keys. To do this, create the GOOGLE_API_KEY in the Google Cloud Credential console. You can access the console from this link: Google Cloud Console
+
+- Then, create a GOOGLE_CSE_ID using the Programmable Search Engine. You can do this by visiting this link: Programmable Search Engine
+
+- After creating these keys, add them to the .env file.
 
 ## Deploying the Application Locally
 - Navigate to the project directory containing the docker-compose.yml file.
