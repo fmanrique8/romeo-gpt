@@ -53,7 +53,7 @@ These were previous tasks you completed:
 Previous conversation history:
 {history}
 
-Begin! Provide detailed and insightful answer
+Begin! The answer should very detailed: 
 
 Question: {input}
 {agent_scratchpad}"""

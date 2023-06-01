@@ -11,7 +11,7 @@ Text Chunks: {text_chunks}
 
 Question: {input}
 
-Begin! The answer should detailed and insightful: 
+Begin! The answer should very detailed: 
 {agent_scratchpad}"""
 
 
